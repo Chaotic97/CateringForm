@@ -1,6 +1,6 @@
 import type { MenuItem } from '../../types/menu';
 
-interface DishCardProps {
+interface BuyoutDishCardProps {
   dish: MenuItem;
   selected: boolean;
   onToggle: () => void;
@@ -14,7 +14,7 @@ const TAG_LABELS: Record<string, string> = {
   spicy: 'Spicy',
 };
 
-export function DishCard({ dish, selected, onToggle }: DishCardProps) {
+export function BuyoutDishCard({ dish, selected, onToggle }: BuyoutDishCardProps) {
   return (
     <button
       type="button"
@@ -65,31 +65,31 @@ export function DishCard({ dish, selected, onToggle }: DishCardProps) {
           <h4 className="font-body font-semibold text-text-main text-sm">
             {dish.name}
           </h4>
+          {dish.isPremium && (
+            <span className="inline-flex items-center rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-semibold font-body text-accent uppercase tracking-wide">
+              Premium
+            </span>
+          )}
         </div>
         <p className="font-body text-xs text-muted mt-1 leading-relaxed">
           {dish.description}
         </p>
       </div>
 
-      {/* Footer: price + tags + allergens */}
+      {/* Footer: dietary tags + allergens */}
       <div className="mt-3 flex flex-col gap-1.5">
-        <div className="flex items-center justify-between gap-2">
-          <span className="font-body text-sm font-semibold text-primary">
-            ${dish.pricePerPerson}/pp
-          </span>
-          {dish.dietaryTags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {dish.dietaryTags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center rounded-full bg-surface px-2 py-0.5 text-[10px] font-medium font-body text-muted"
-                >
-                  {TAG_LABELS[tag] ?? tag}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
+        {dish.dietaryTags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {dish.dietaryTags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center rounded-full bg-surface px-2 py-0.5 text-[10px] font-medium font-body text-muted"
+              >
+                {TAG_LABELS[tag] ?? tag}
+              </span>
+            ))}
+          </div>
+        )}
         {dish.allergens.length > 0 && (
           <p className="font-body text-[10px] italic text-muted/70">
             Contains: {dish.allergens.join(', ')}

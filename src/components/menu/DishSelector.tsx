@@ -1,4 +1,4 @@
-import { MENU_ITEMS, CATEGORY_LABELS, CATEGORY_ORDER } from '../../config/menu-items';
+import { useMenuItems } from '../../hooks/useMenuItems';
 import { DishCard } from './DishCard';
 
 interface DishSelectorProps {
@@ -7,7 +7,8 @@ interface DishSelectorProps {
 }
 
 export function DishSelector({ selectedDishIds, onToggleDish }: DishSelectorProps) {
-  const availableItems = MENU_ITEMS.filter((item) => item.available);
+  const { items, CATEGORY_LABELS, CATEGORY_ORDER } = useMenuItems();
+  const availableItems = items.filter((item) => item.available);
 
   const groupedItems = CATEGORY_ORDER.map((category) => ({
     category,

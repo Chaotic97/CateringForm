@@ -1,18 +1,20 @@
 import { useMemo } from 'react';
 import { useFormStore } from '../store/useFormStore';
-import { MEAL_TYPE_PRICING, BAR_PRICING, PRICING_NOTES } from '../config/pricing';
-import { MENU_ITEMS } from '../config/menu-items';
+import { useMenuItems } from './useMenuItems';
+import { usePricingTiers } from './usePricingTiers';
+import { PRICING_NOTES } from '../config/pricing';
 import type { PriceEstimate } from '../types/pricing';
 
 export function useBuyoutPricing(): PriceEstimate | null {
   const { buyoutData } = useFormStore();
   const { mealType, barOption, headcount } = buyoutData;
+  const { mealPricing, barPricing } = usePricingTiers();
 
   return useMemo(() => {
     if (!mealType || !barOption) return null;
 
-    const meal = MEAL_TYPE_PRICING.find((m) => m.mealType === mealType);
-    const bar = BAR_PRICING.find((b) => b.barOption === barOption);
+    const meal = mealPricing.find((m) => m.mealType === mealType);
+    const bar = barPricing.find((b) => b.barOption === barOption);
     if (!meal || !bar) return null;
 
     const foodLow = meal.pricePerPersonLow * headcount;
@@ -30,19 +32,20 @@ export function useBuyoutPricing(): PriceEstimate | null {
       headcount,
       notes: [...PRICING_NOTES],
     };
-  }, [mealType, barOption, headcount]);
+  }, [mealType, barOption, headcount, mealPricing, barPricing]);
 }
 
 export function useToGoPricing(): PriceEstimate | null {
   const { togoData } = useFormStore();
   const { selectedDishes, headcount } = togoData;
+  const { items: menuItems } = useMenuItems();
 
   return useMemo(() => {
     if (selectedDishes.length === 0) return null;
 
     let totalPerPerson = 0;
     for (const sel of selectedDishes) {
-      const item = MENU_ITEMS.find((m) => m.id === sel.dishId);
+      const item = menuItems.find((m) => m.id === sel.dishId);
       if (item) {
         totalPerPerson += item.pricePerPerson;
       }
@@ -60,5 +63,5 @@ export function useToGoPricing(): PriceEstimate | null {
       headcount,
       notes: ['Tax not included', 'Pickup only', 'Final pricing confirmed upon order'],
     };
-  }, [selectedDishes, headcount]);
+  }, [selectedDishes, headcount, menuItems]);
 }

@@ -11,6 +11,7 @@ export interface BuyoutFormData {
   eventDescription: string;
   mealType: MealType | null;
   barOption: BarOption | null;
+  selectedDishes: string[];
 }
 
 export interface ToGoFormData {

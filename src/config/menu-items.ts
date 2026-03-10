@@ -10,6 +10,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 4,
     isSignature: true,
     dietaryTags: [],
+    allergens: ['wheat', 'soy', 'sesame'],
     available: true,
   },
   {
@@ -20,6 +21,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 4,
     isSignature: false,
     dietaryTags: ['spicy'],
+    allergens: ['wheat', 'shellfish', 'soy', 'sesame'],
     available: true,
   },
   {
@@ -30,6 +32,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 3,
     isSignature: false,
     dietaryTags: ['vegetarian', 'vegan'],
+    allergens: ['wheat', 'soy'],
     available: true,
   },
   {
@@ -40,6 +43,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 5,
     isSignature: true,
     dietaryTags: ['spicy'],
+    allergens: ['shellfish', 'wheat'],
     available: true,
   },
   {
@@ -50,6 +54,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 3,
     isSignature: false,
     dietaryTags: ['vegetarian'],
+    allergens: ['wheat', 'soy', 'eggs'],
     available: true,
   },
 
@@ -62,6 +67,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 3,
     isSignature: false,
     dietaryTags: ['spicy'],
+    allergens: ['soy', 'eggs', 'wheat'],
     available: true,
   },
   {
@@ -72,6 +78,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 4,
     isSignature: false,
     dietaryTags: [],
+    allergens: ['wheat', 'soy'],
     available: true,
   },
 
@@ -84,6 +91,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 8,
     isSignature: true,
     dietaryTags: [],
+    allergens: ['wheat', 'soy', 'eggs'],
     available: true,
   },
   {
@@ -94,6 +102,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 7,
     isSignature: false,
     dietaryTags: ['vegetarian', 'spicy', 'gluten-free'],
+    allergens: ['soy'],
     available: true,
   },
   {
@@ -104,6 +113,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 9,
     isSignature: true,
     dietaryTags: [],
+    allergens: ['soy', 'wheat'],
     available: true,
   },
   {
@@ -114,6 +124,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 9,
     isSignature: false,
     dietaryTags: ['spicy', 'contains-nuts'],
+    allergens: ['shellfish', 'peanuts', 'soy', 'wheat'],
     available: true,
   },
   {
@@ -124,6 +135,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 12,
     isSignature: true,
     dietaryTags: ['gluten-free'],
+    allergens: ['fish', 'soy'],
     available: true,
   },
   {
@@ -134,6 +146,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 11,
     isSignature: true,
     dietaryTags: [],
+    allergens: ['soy', 'wheat'],
     available: true,
   },
   {
@@ -144,6 +157,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 6,
     isSignature: false,
     dietaryTags: ['vegetarian', 'vegan'],
+    allergens: ['soy'],
     available: true,
   },
 
@@ -156,6 +170,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 3,
     isSignature: false,
     dietaryTags: ['vegetarian'],
+    allergens: ['soy', 'shellfish'],
     available: true,
   },
   {
@@ -166,6 +181,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 3,
     isSignature: false,
     dietaryTags: ['spicy'],
+    allergens: ['soy'],
     available: true,
   },
 
@@ -178,6 +194,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 5,
     isSignature: false,
     dietaryTags: ['spicy', 'contains-nuts'],
+    allergens: ['wheat', 'peanuts', 'soy', 'sesame'],
     available: true,
   },
   {
@@ -188,6 +205,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 4,
     isSignature: false,
     dietaryTags: [],
+    allergens: ['eggs', 'shellfish', 'soy'],
     available: true,
   },
   {
@@ -198,6 +216,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 4,
     isSignature: false,
     dietaryTags: ['vegetarian'],
+    allergens: ['wheat', 'eggs', 'soy'],
     available: true,
   },
   {
@@ -208,6 +227,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 2,
     isSignature: false,
     dietaryTags: ['vegetarian', 'vegan', 'gluten-free'],
+    allergens: [],
     available: true,
   },
 
@@ -220,6 +240,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 5,
     isSignature: true,
     dietaryTags: ['vegetarian'],
+    allergens: ['dairy', 'eggs', 'sesame'],
     available: true,
   },
   {
@@ -230,6 +251,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 4,
     isSignature: false,
     dietaryTags: ['vegetarian', 'gluten-free', 'contains-nuts'],
+    allergens: ['peanuts', 'tree-nuts'],
     available: true,
   },
   {
@@ -240,6 +262,7 @@ export const MENU_ITEMS: MenuItem[] = [
     pricePerPerson: 3,
     isSignature: false,
     dietaryTags: ['vegetarian'],
+    allergens: ['wheat', 'sesame', 'soy'],
     available: true,
   },
 ];

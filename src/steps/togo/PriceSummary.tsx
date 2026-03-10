@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useFormStore } from '../../store/useFormStore';
 import { useToGoPricing } from '../../hooks/usePricing';
-import { MENU_ITEMS } from '../../config/menu-items';
+import { useMenuItems } from '../../hooks/useMenuItems';
 import { sendInquiryNotification } from '../../services/email';
 import { Button } from '../../components/ui/Button';
 
@@ -15,6 +15,7 @@ function formatCurrency(amount: number): string {
 }
 
 export function PriceSummary() {
+  const { items: menuItems } = useMenuItems();
   const {
     togoData,
     contactData,
@@ -85,7 +86,7 @@ export function PriceSummary() {
         </h3>
         <div className="flex flex-col gap-2">
           {togoData.selectedDishes.map((sel) => {
-            const item = MENU_ITEMS.find((m) => m.id === sel.dishId);
+            const item = menuItems.find((m) => m.id === sel.dishId);
             if (!item) return null;
             return (
               <div key={sel.dishId} className="flex items-center justify-between">

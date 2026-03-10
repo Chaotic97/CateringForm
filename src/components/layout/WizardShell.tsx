@@ -66,6 +66,8 @@ export function WizardShell({
       {/* Footer */}
       <footer className="bg-secondary text-white/40 text-center text-xs py-4">
         {RESTAURANT_NAME} &middot; Private Events & Catering Inquiries
+        <span className="mx-2">&middot;</span>
+        <a href="/admin/" className="hover:text-white/60 transition-colors">Staff</a>
       </footer>
     </div>
   );

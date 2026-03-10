@@ -8,6 +8,17 @@ export type DishCategory =
 
 export type DietaryTag = 'vegetarian' | 'vegan' | 'gluten-free' | 'contains-nuts' | 'spicy';
 
+export type Allergen =
+  | 'shellfish'
+  | 'dairy'
+  | 'soy'
+  | 'eggs'
+  | 'wheat'
+  | 'peanuts'
+  | 'tree-nuts'
+  | 'sesame'
+  | 'fish';
+
 export interface MenuItem {
   id: string;
   name: string;
@@ -15,6 +26,8 @@ export interface MenuItem {
   category: DishCategory;
   pricePerPerson: number;
   isSignature: boolean;
+  isPremium?: boolean;
   dietaryTags: DietaryTag[];
+  allergens: Allergen[];
   available: boolean;
 }

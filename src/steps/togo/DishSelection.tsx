@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useFormStore } from '../../store/useFormStore';
 import { PICKUP_TIME_SLOTS } from '../../config/form-options';
-import { MENU_ITEMS } from '../../config/menu-items';
+import { useMenuItems } from '../../hooks/useMenuItems';
 import { Counter } from '../../components/ui/Counter';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
@@ -15,13 +15,14 @@ export function DishSelection() {
   const [pickupDate, setPickupDate] = useState(togoData.preferredPickupDate);
   const [pickupTime, setPickupTime] = useState(togoData.preferredPickupTime);
   const [error, setError] = useState<string | null>(null);
+  const { items: menuItems } = useMenuItems();
 
   const selectedDishIds = togoData.selectedDishes.map((d) => d.dishId);
 
   const runningTotal = useMemo(() => {
     let perPerson = 0;
     for (const sel of togoData.selectedDishes) {
-      const item = MENU_ITEMS.find((m) => m.id === sel.dishId);
+      const item = menuItems.find((m) => m.id === sel.dishId);
       if (item) perPerson += item.pricePerPerson;
     }
     return perPerson * headcount;

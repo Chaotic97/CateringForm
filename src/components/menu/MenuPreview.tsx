@@ -1,11 +1,12 @@
-import { MENU_ITEMS, CATEGORY_LABELS, CATEGORY_ORDER } from '../../config/menu-items';
+import { useMenuItems } from '../../hooks/useMenuItems';
 
 interface MenuPreviewProps {
   mealType: string;
 }
 
 export function MenuPreview({ mealType }: MenuPreviewProps) {
-  const availableItems = MENU_ITEMS.filter((item) => item.available);
+  const { items, CATEGORY_LABELS, CATEGORY_ORDER } = useMenuItems();
+  const availableItems = items.filter((item) => item.available);
 
   const groupedItems = CATEGORY_ORDER.map((category) => ({
     category,
@@ -68,6 +69,11 @@ export function MenuPreview({ mealType }: MenuPreviewProps) {
                   <p className="font-body text-sm text-muted mt-0.5">
                     {item.description}
                   </p>
+                  {item.allergens.length > 0 && (
+                    <p className="font-body text-[10px] italic text-muted/60 mt-0.5">
+                      Contains: {item.allergens.join(', ')}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

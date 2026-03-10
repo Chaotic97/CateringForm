@@ -19,6 +19,7 @@ interface FormStore {
   updateBuyoutEvent: (data: Partial<BuyoutFormData>) => void;
   updateBuyoutMenu: (mealType: MealType, barOption: BarOption) => void;
   updateToGo: (data: Partial<ToGoFormData>) => void;
+  toggleBuyoutDish: (dishId: string) => void;
   toggleDish: (dishId: string, headcount: number) => void;
   updateContact: (data: Partial<ContactData>) => void;
   submit: () => void;
@@ -33,6 +34,7 @@ const initialBuyout: BuyoutFormData = {
   eventDescription: '',
   mealType: null,
   barOption: null,
+  selectedDishes: [],
 };
 
 const initialToGo: ToGoFormData = {
@@ -85,6 +87,17 @@ export const useFormStore = create<FormStore>()(
         set((state) => ({
           togoData: { ...state.togoData, ...data },
         })),
+
+      toggleBuyoutDish: (dishId) =>
+        set((state) => {
+          const dishes = state.buyoutData.selectedDishes;
+          const selectedDishes = dishes.includes(dishId)
+            ? dishes.filter((id) => id !== dishId)
+            : [...dishes, dishId];
+          return {
+            buyoutData: { ...state.buyoutData, selectedDishes },
+          };
+        }),
 
       toggleDish: (dishId, headcount) =>
         set((state) => {
