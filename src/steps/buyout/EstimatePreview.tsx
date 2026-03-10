@@ -51,9 +51,18 @@ export function EstimatePreview() {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        {/* Price Estimate */}
-        <div>
+        {/* Price Estimate + Submit */}
+        <div className="flex flex-col gap-6">
           {estimate && <PriceEstimate estimate={estimate} />}
+          <Button
+            type="button"
+            size="lg"
+            className="w-full"
+            onClick={handleSubmit}
+            disabled={submitting}
+          >
+            {submitting ? 'Submitting...' : 'Submit Inquiry'}
+          </Button>
         </div>
 
         {/* Menu Preview */}
@@ -63,16 +72,6 @@ export function EstimatePreview() {
           )}
         </div>
       </div>
-
-      <Button
-        type="button"
-        size="lg"
-        className="w-full max-w-md mx-auto"
-        onClick={handleSubmit}
-        disabled={submitting}
-      >
-        {submitting ? 'Submitting...' : 'Submit Inquiry'}
-      </Button>
     </div>
   );
 }
