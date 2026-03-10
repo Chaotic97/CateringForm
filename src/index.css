@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+/* Brand tokens — update via branding/brand-tokens.json */
+@theme {
+  --color-primary: #c41e3a;
+  --color-primary-light: #e8435a;
+  --color-primary-dark: #9a1830;
+  --color-secondary: #1a1a2e;
+  --color-accent: #d4af37;
+  --color-accent-light: #e8c960;
+  --color-surface: #faf9f6;
+  --color-surface-dark: #f0ede8;
+  --color-background: #ffffff;
+  --color-text-main: #1a1a1a;
+  --color-muted: #6b7280;
+  --color-text-light: #9ca3af;
+  --color-error: #dc2626;
+  --color-success: #16a34a;
+  --color-border: #e5e7eb;
+  --color-border-dark: #d1d5db;
+
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+/* Base styles */
+body {
+  font-family: var(--font-body);
+  color: var(--color-text-main);
+  background-color: var(--color-surface);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-dark);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
