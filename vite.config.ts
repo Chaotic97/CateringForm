@@ -1,10 +1,25 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
 
+// Rewrite /admin routes to the admin entry point in dev
+function adminRewrite(): Plugin {
+  return {
+    name: 'admin-rewrite',
+    configureServer(server) {
+      server.middlewares.use((req, _res, next) => {
+        if (req.url && (req.url === '/admin' || req.url === '/admin/' || req.url.startsWith('/admin/#'))) {
+          req.url = '/src/admin/admin.html';
+        }
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [adminRewrite(), react(), tailwindcss()],
   resolve: {
     alias: {
       '@': '/src',
