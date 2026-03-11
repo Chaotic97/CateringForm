@@ -8,7 +8,7 @@ export function useApi<T>(url: string | null) {
   const refetch = useCallback(() => {
     if (!url) return;
     setLoading(true);
-    fetch(url)
+    fetch(url, { credentials: 'same-origin' })
       .then((res) => {
         if (!res.ok) throw new Error('Request failed');
         return res.json();
