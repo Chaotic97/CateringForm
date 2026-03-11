@@ -68,6 +68,25 @@ export function Welcome() {
           </motion.button>
         ))}
       </div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.45 }}
+        className="mt-8 text-center max-w-md"
+      >
+        <p className="font-body text-sm text-muted leading-relaxed">
+          Have something unique in mind?{' '}
+          <button
+            type="button"
+            onClick={() => setCateringType('general')}
+            className="text-primary font-medium hover:underline focus:outline-none cursor-pointer"
+          >
+            Contact our team directly
+          </button>{' '}
+          and we'll make it happen.
+        </p>
+      </motion.div>
     </div>
   );
 }

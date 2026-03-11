@@ -1,4 +1,4 @@
-export type CateringType = 'buyout' | 'togo';
+export type CateringType = 'buyout' | 'togo' | 'general';
 
 export type MealType = 'tasting' | 'family-style' | 'buffet' | 'small-bites';
 export type BarOption = 'cash-bar' | 'open-bar' | 'pairings' | 'none';

@@ -59,8 +59,9 @@ router.post('/', async (req, res) => {
   }
 
   const isBuyout = cateringType === 'buyout';
-  const headcount = isBuyout ? buyoutData?.headcount : togoData?.headcount;
-  const selectedDishes = isBuyout ? (buyoutData?.selectedDishes || []) : (togoData?.selectedDishes || []);
+  const isGeneral = cateringType === 'general';
+  const headcount = isBuyout ? buyoutData?.headcount : isGeneral ? 0 : togoData?.headcount;
+  const selectedDishes = isBuyout ? (buyoutData?.selectedDishes || []) : isGeneral ? [] : (togoData?.selectedDishes || []);
 
   const result = db.prepare(`
     INSERT INTO inquiries (
@@ -80,8 +81,8 @@ router.post('/', async (req, res) => {
     isBuyout ? buyoutData?.eventDescription : null,
     isBuyout ? buyoutData?.mealType : null,
     isBuyout ? buyoutData?.barOption : null,
-    !isBuyout ? togoData?.preferredPickupDate : null,
-    !isBuyout ? togoData?.preferredPickupTime : null,
+    (!isBuyout && !isGeneral) ? togoData?.preferredPickupDate : null,
+    (!isBuyout && !isGeneral) ? togoData?.preferredPickupTime : null,
     JSON.stringify(selectedDishes),
     estimateLow ?? null,
     estimateHigh ?? null,
@@ -100,15 +101,16 @@ router.post('/', async (req, res) => {
       await resend.emails.send({
         from: 'Sum Bar Catering <onboarding@resend.dev>',
         to: staffEmail,
-        subject: `New ${cateringType} inquiry from ${contactData.firstName} ${contactData.lastName}`,
+        subject: `New ${cateringType === 'general' ? 'general' : cateringType} inquiry from ${contactData.firstName} ${contactData.lastName}`,
         html: `
-          <h2>New Catering Inquiry</h2>
-          <p><strong>Type:</strong> ${cateringType === 'buyout' ? 'Restaurant Buyout' : 'To-Go Catering'}</p>
+          <h2>New ${cateringType === 'general' ? 'General' : 'Catering'} Inquiry</h2>
+          <p><strong>Type:</strong> ${cateringType === 'buyout' ? 'Restaurant Buyout' : cateringType === 'togo' ? 'To-Go Catering' : 'General Inquiry'}</p>
           <p><strong>Contact:</strong> ${contactData.firstName} ${contactData.lastName}</p>
           <p><strong>Email:</strong> ${contactData.email}</p>
-          <p><strong>Headcount:</strong> ${headcount}</p>
+          ${!isGeneral ? `<p><strong>Headcount:</strong> ${headcount}</p>` : ''}
           ${isBuyout && buyoutData?.eventDate ? `<p><strong>Event Date:</strong> ${buyoutData.eventDate}</p>` : ''}
-          ${!isBuyout && togoData?.preferredPickupDate ? `<p><strong>Pickup Date:</strong> ${togoData.preferredPickupDate}</p>` : ''}
+          ${!isBuyout && !isGeneral && togoData?.preferredPickupDate ? `<p><strong>Pickup Date:</strong> ${togoData.preferredPickupDate}</p>` : ''}
+          ${isGeneral && contactData.specialRequests ? `<p><strong>Message:</strong> ${contactData.specialRequests}</p>` : ''}
           <p><a href="${adminUrl}">View in Admin Panel</a></p>
         `,
       });
