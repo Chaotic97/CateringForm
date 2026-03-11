@@ -36,7 +36,7 @@ export function Login({ onLogin }: LoginProps) {
         <div className="flex flex-col gap-3">
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Username</label>
-            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required autoFocus
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required autoFocus autoCapitalize="none" autoCorrect="off"
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
           </div>
           <div>
