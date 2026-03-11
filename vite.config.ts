@@ -10,7 +10,7 @@ function adminRewrite(): Plugin {
     configureServer(server) {
       server.middlewares.use((req, _res, next) => {
         if (req.url && (req.url === '/admin' || req.url === '/admin/' || req.url.startsWith('/admin/#'))) {
-          req.url = '/src/admin/admin.html';
+          req.url = '/src/admin/index.html';
         }
         next();
       });
@@ -34,7 +34,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
-        admin: path.resolve(__dirname, 'src/admin/admin.html'),
+        admin: path.resolve(__dirname, 'src/admin/index.html'),
       },
     },
   },

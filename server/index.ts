@@ -50,13 +50,9 @@ if (process.env.NODE_ENV === 'production') {
   // Admin SPA — Vite outputs to dist/src/admin/ for multi-page builds
   const adminDir = path.join(distDir, 'src', 'admin');
   app.use('/admin', express.static(adminDir, { maxAge: 0 }));
-  app.get('/admin', (_req, res) => {
-    res.set('Cache-Control', 'no-cache');
-    res.sendFile(path.join(adminDir, 'admin.html'));
-  });
   app.get('/admin/{*rest}', (_req, res) => {
     res.set('Cache-Control', 'no-cache');
-    res.sendFile(path.join(adminDir, 'admin.html'));
+    res.sendFile(path.join(adminDir, 'index.html'));
   });
 
   // Customer form (main SPA)
