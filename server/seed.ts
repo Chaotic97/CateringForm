@@ -102,6 +102,15 @@ function seed() {
     const tx = db.transaction(() => {
       insertSetting.run('buyout_description', 'Reserve the entire restaurant for your private event. Choose from tasting menus, family style, buffet, or small bites with full bar service.');
       insertSetting.run('togo_description', 'Order our signature dishes for pickup. Perfect for office lunches, parties, and celebrations of any size.');
+      insertSetting.run('category_labels', JSON.stringify({
+        appetizer: 'Appetizers',
+        soup: 'Soups',
+        entree: 'Entrées',
+        side: 'Sides',
+        'noodles-rice': 'Noodles & Rice',
+        dessert: 'Desserts',
+      }));
+      insertSetting.run('general_description', 'Have something unique in mind or just want to chat? Reach out to our sales team and we\'ll help bring your vision to life.');
       insertSetting.run('recommended_dishes', JSON.stringify({
         appetizer:      [{ maxHeadcount: 20, count: 2 }, { maxHeadcount: 40, count: 3 }, { maxHeadcount: 80, count: 4 }],
         soup:           [{ maxHeadcount: 40, count: 1 }, { maxHeadcount: 80, count: 2 }],

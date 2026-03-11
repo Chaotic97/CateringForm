@@ -14,6 +14,8 @@ export interface RentalFee {
 interface SiteSettings {
   buyoutDescription: string;
   togoDescription: string;
+  generalDescription: string;
+  categoryLabels: Record<string, string>;
   recommendedDishes: Record<string, RecommendedTier[]>;
   rentalFees: RentalFee[];
   loading: boolean;
@@ -21,6 +23,16 @@ interface SiteSettings {
 
 const DEFAULT_BUYOUT_DESC = 'Reserve the entire restaurant for your private event. Choose from tasting menus, family style, buffet, or small bites with full bar service.';
 const DEFAULT_TOGO_DESC = 'Order our signature dishes for pickup. Perfect for office lunches, parties, and celebrations of any size.';
+const DEFAULT_GENERAL_DESC = 'Have something unique in mind or just want to chat? Reach out to our sales team and we\'ll help bring your vision to life.';
+
+export const DEFAULT_CATEGORY_LABELS: Record<string, string> = {
+  appetizer: 'Appetizers',
+  soup: 'Soups',
+  entree: 'Entrées',
+  side: 'Sides',
+  'noodles-rice': 'Noodles & Rice',
+  dessert: 'Desserts',
+};
 
 const DEFAULT_RECOMMENDED: Record<string, RecommendedTier[]> = {
   appetizer:      [{ maxHeadcount: 20, count: 2 }, { maxHeadcount: 40, count: 3 }, { maxHeadcount: 80, count: 4 }],
@@ -47,6 +59,8 @@ export function useSiteSettings(): SiteSettings {
   const [state, setState] = useState<Omit<SiteSettings, 'loading'>>(cached ?? {
     buyoutDescription: DEFAULT_BUYOUT_DESC,
     togoDescription: DEFAULT_TOGO_DESC,
+    generalDescription: DEFAULT_GENERAL_DESC,
+    categoryLabels: DEFAULT_CATEGORY_LABELS,
     recommendedDishes: DEFAULT_RECOMMENDED,
     rentalFees: DEFAULT_RENTAL_FEES,
   });
@@ -67,9 +81,18 @@ export function useSiteSettings(): SiteSettings {
           }
         } catch { /* use default */ }
 
+        let categoryLabels = DEFAULT_CATEGORY_LABELS;
+        try {
+          if (settings.category_labels) {
+            categoryLabels = { ...DEFAULT_CATEGORY_LABELS, ...JSON.parse(settings.category_labels) };
+          }
+        } catch { /* use default */ }
+
         const result = {
           buyoutDescription: settings.buyout_description || DEFAULT_BUYOUT_DESC,
           togoDescription: settings.togo_description || DEFAULT_TOGO_DESC,
+          generalDescription: settings.general_description || DEFAULT_GENERAL_DESC,
+          categoryLabels,
           recommendedDishes: recommended,
           rentalFees: fees.length > 0 ? fees : DEFAULT_RENTAL_FEES,
         };
@@ -80,6 +103,8 @@ export function useSiteSettings(): SiteSettings {
         cached = {
           buyoutDescription: DEFAULT_BUYOUT_DESC,
           togoDescription: DEFAULT_TOGO_DESC,
+          generalDescription: DEFAULT_GENERAL_DESC,
+          categoryLabels: DEFAULT_CATEGORY_LABELS,
           recommendedDishes: DEFAULT_RECOMMENDED,
           rentalFees: DEFAULT_RENTAL_FEES,
         };

@@ -27,6 +27,8 @@ const CATEGORY_ORDER = ['appetizer', 'soup', 'entree', 'side', 'noodles-rice', '
 export function Settings() {
   const [buyoutDesc, setBuyoutDesc] = useState('');
   const [togoDesc, setTogoDesc] = useState('');
+  const [generalDesc, setGeneralDesc] = useState('');
+  const [categoryLabels, setCategoryLabels] = useState<Record<string, string>>({ ...CATEGORY_LABELS });
   const [recommended, setRecommended] = useState<RecommendedDishes>({});
   const [rentalFees, setRentalFees] = useState<RentalFee[]>([]);
   const [saving, setSaving] = useState<string | null>(null);
@@ -39,6 +41,10 @@ export function Settings() {
     ]).then(([settings, fees]: [Record<string, string>, RentalFee[]]) => {
       setBuyoutDesc(settings.buyout_description || '');
       setTogoDesc(settings.togo_description || '');
+      setGeneralDesc(settings.general_description || '');
+      try {
+        setCategoryLabels(settings.category_labels ? { ...CATEGORY_LABELS, ...JSON.parse(settings.category_labels) } : { ...CATEGORY_LABELS });
+      } catch { setCategoryLabels({ ...CATEGORY_LABELS }); }
       try {
         setRecommended(settings.recommended_dishes ? JSON.parse(settings.recommended_dishes) : {});
       } catch { setRecommended({}); }
@@ -158,7 +164,69 @@ export function Settings() {
               {saving === 'togo_description' ? 'Saving...' : 'Save'}
             </button>
           </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Contact Our Team</label>
+            <textarea
+              value={generalDesc}
+              onChange={(e) => setGeneralDesc(e.target.value)}
+              rows={3}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+            />
+            <button
+              onClick={() => saveDescription('general_description', generalDesc)}
+              disabled={saving === 'general_description'}
+              className="mt-1 text-xs text-white bg-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+            >
+              {saving === 'general_description' ? 'Saving...' : 'Save'}
+            </button>
+          </div>
         </div>
+      </section>
+
+      {/* Category Names */}
+      <section className="flex flex-col gap-4">
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Menu Category Names</h2>
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+              <tr>
+                <th className="px-4 py-2 text-left">Category Key</th>
+                <th className="px-4 py-2 text-left">Display Name</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {CATEGORY_ORDER.map((cat) => (
+                <tr key={cat} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 text-gray-500 text-xs font-mono">{cat}</td>
+                  <td className="px-4 py-3">
+                    <input
+                      value={categoryLabels[cat] || ''}
+                      onChange={(e) => setCategoryLabels((prev) => ({ ...prev, [cat]: e.target.value }))}
+                      className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <button
+          onClick={async () => {
+            setSaving('category_labels');
+            await fetch('/api/settings/category_labels', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ value: JSON.stringify(categoryLabels) }),
+            });
+            setSaving(null);
+            flash('Category names saved');
+          }}
+          disabled={saving === 'category_labels'}
+          className="self-start text-sm text-white bg-gray-900 px-4 py-2 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+        >
+          {saving === 'category_labels' ? 'Saving...' : 'Save Category Names'}
+        </button>
       </section>
 
       {/* Rental Fees */}

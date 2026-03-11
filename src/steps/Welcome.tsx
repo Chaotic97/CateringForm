@@ -5,7 +5,7 @@ import type { CateringType } from '../types/form';
 
 export function Welcome() {
   const setCateringType = useFormStore((s) => s.setCateringType);
-  const { buyoutDescription, togoDescription } = useSiteSettings();
+  const { buyoutDescription, togoDescription, generalDescription } = useSiteSettings();
 
   const cards: {
     type: CateringType;
@@ -26,6 +26,13 @@ export function Welcome() {
       description: togoDescription,
     },
   ];
+
+  const contactCard = {
+    type: 'general' as CateringType,
+    icon: '\u{1F4AC}',
+    title: 'Contact Our Team',
+    description: generalDescription,
+  };
 
   return (
     <div className="flex flex-col items-center px-4 py-12">
@@ -69,24 +76,26 @@ export function Welcome() {
         ))}
       </div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.45 }}
-        className="mt-8 text-center max-w-md"
+      <motion.button
+        type="button"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.35 }}
+        whileHover={{ scale: 1.03, boxShadow: '0 8px 30px rgba(0,0,0,0.08)' }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => setCateringType(contactCard.type)}
+        className="mt-6 flex flex-col items-center gap-4 rounded-2xl border-2 border-border bg-surface p-8 text-center transition-colors duration-150 hover:border-primary/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 cursor-pointer w-full max-w-2xl"
       >
+        <span className="text-5xl" role="img" aria-hidden="true">
+          {contactCard.icon}
+        </span>
+        <h2 className="font-heading text-xl font-semibold text-text-main">
+          {contactCard.title}
+        </h2>
         <p className="font-body text-sm text-muted leading-relaxed">
-          Have something unique in mind?{' '}
-          <button
-            type="button"
-            onClick={() => setCateringType('general')}
-            className="text-primary font-medium hover:underline focus:outline-none cursor-pointer"
-          >
-            Contact our team directly
-          </button>{' '}
-          and we'll make it happen.
+          {contactCard.description}
         </p>
-      </motion.div>
+      </motion.button>
     </div>
   );
 }
