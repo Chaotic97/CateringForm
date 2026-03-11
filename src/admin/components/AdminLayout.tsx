@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { path: '/inquiries', label: 'Inquiries' },
   { path: '/menu', label: 'Menu' },
   { path: '/pricing', label: 'Pricing' },
+  { path: '/settings', label: 'Settings' },
 ];
 
 export function AdminLayout({ children, currentPath, onNavigate, displayName, onLogout }: AdminLayoutProps) {

@@ -6,6 +6,7 @@ import { InquiryList } from './pages/InquiryList';
 import { InquiryDetail } from './pages/InquiryDetail';
 import { MenuManager } from './pages/MenuManager';
 import { PricingEditor } from './pages/PricingEditor';
+import { Settings } from './pages/Settings';
 import { AdminLayout } from './components/AdminLayout';
 
 function getHashPath() {
@@ -49,6 +50,7 @@ export default function App() {
 
     if (path === '/menu') return <MenuManager />;
     if (path === '/pricing') return <PricingEditor />;
+    if (path === '/settings') return <Settings />;
 
     return <Dashboard onNavigate={navigate} />;
   };

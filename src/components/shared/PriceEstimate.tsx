@@ -39,6 +39,16 @@ export function PriceEstimate({ estimate }: PriceEstimateProps) {
         {(estimate.barLow > 0 || estimate.barHigh > 0) && (
           <PriceRange low={estimate.barLow} high={estimate.barHigh} label="Bar" />
         )}
+        {estimate.rentalFee > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="font-body text-sm text-muted">
+              Venue Rental{estimate.rentalDayLabel ? ` (${estimate.rentalDayLabel})` : ''}
+            </span>
+            <span className="font-body text-sm font-medium text-text-main">
+              {formatCurrency(estimate.rentalFee)}
+            </span>
+          </div>
+        )}
 
         <div className="my-2 border-t border-border" />
 

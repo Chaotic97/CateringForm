@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useFormStore } from '../../store/useFormStore';
 import { usePricingTiers } from '../../hooks/usePricingTiers';
 import { useMenuItems } from '../../hooks/useMenuItems';
+import { useSiteSettings, getRecommendedCount } from '../../hooks/useSiteSettings';
 import { RadioCardGroup } from '../../components/ui/RadioCardGroup';
 import { BuyoutDishCard } from '../../components/menu/BuyoutDishCard';
 import { Button } from '../../components/ui/Button';
@@ -25,6 +26,7 @@ export function MenuStyle() {
   const [error, setError] = useState<string | null>(null);
   const { mealPricing, barPricing } = usePricingTiers();
   const { items: menuItems, CATEGORY_LABELS, CATEGORY_ORDER } = useMenuItems();
+  const { recommendedDishes } = useSiteSettings();
 
   const mealOptions = mealPricing.map((m) => ({
     value: m.mealType,
@@ -157,8 +159,13 @@ export function MenuStyle() {
             <div className="flex flex-col gap-6">
               {groupedItems.map((group) => (
                 <div key={group.category}>
-                  <h4 className="font-heading text-sm uppercase tracking-[0.12em] text-accent mb-3">
+                  <h4 className="font-heading text-sm uppercase tracking-[0.12em] text-accent mb-3 flex items-center gap-2">
                     {group.label}
+                    {recommendedDishes[group.category] && (
+                      <span className="text-[11px] font-body normal-case tracking-normal text-muted font-normal">
+                        — {getRecommendedCount(recommendedDishes[group.category], buyoutData.headcount)} recommended
+                      </span>
+                    )}
                   </h4>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {group.items.map((dish) => (

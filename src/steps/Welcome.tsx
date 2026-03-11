@@ -1,31 +1,31 @@
 import { motion } from 'framer-motion';
 import { useFormStore } from '../store/useFormStore';
+import { useSiteSettings } from '../hooks/useSiteSettings';
 import type { CateringType } from '../types/form';
-
-const cards: {
-  type: CateringType;
-  icon: string;
-  title: string;
-  description: string;
-}[] = [
-  {
-    type: 'buyout',
-    icon: '\u{1F3DB}\uFE0F',
-    title: 'Restaurant Buyout',
-    description:
-      'Reserve the entire restaurant for your private event. Choose from tasting menus, family style, buffet, or small bites with full bar service.',
-  },
-  {
-    type: 'togo',
-    icon: '\u{1F961}',
-    title: 'To-Go Catering',
-    description:
-      'Order our signature dishes for pickup. Perfect for office lunches, parties, and celebrations of any size.',
-  },
-];
 
 export function Welcome() {
   const setCateringType = useFormStore((s) => s.setCateringType);
+  const { buyoutDescription, togoDescription } = useSiteSettings();
+
+  const cards: {
+    type: CateringType;
+    icon: string;
+    title: string;
+    description: string;
+  }[] = [
+    {
+      type: 'buyout',
+      icon: '\u{1F3DB}\uFE0F',
+      title: 'Restaurant Buyout',
+      description: buyoutDescription,
+    },
+    {
+      type: 'togo',
+      icon: '\u{1F961}',
+      title: 'To-Go Catering',
+      description: togoDescription,
+    },
+  ];
 
   return (
     <div className="flex flex-col items-center px-4 py-12">

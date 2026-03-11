@@ -86,6 +86,19 @@ db.exec(`
     password_hash TEXT NOT NULL,
     display_name TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS site_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS rental_fees (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day_of_week INTEGER NOT NULL UNIQUE,
+    day_label TEXT NOT NULL,
+    fee REAL NOT NULL DEFAULT 0,
+    sort_order INTEGER NOT NULL DEFAULT 0
+  );
 `);
 
 export default db;

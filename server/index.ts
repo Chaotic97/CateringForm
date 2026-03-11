@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.ts';
 import inquiryRoutes from './routes/inquiries.ts';
 import menuRoutes from './routes/menu.ts';
 import pricingRoutes from './routes/pricing.ts';
+import settingsRoutes from './routes/settings.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -36,6 +37,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/pricing', pricingRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // In production, serve Vite build output
 if (process.env.NODE_ENV === 'production') {

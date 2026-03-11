@@ -95,6 +95,47 @@ function seed() {
     console.log(`  Employees already seeded (${empCount.count} rows)`);
   }
 
+  // Site settings
+  const settingsCount = db.prepare('SELECT COUNT(*) as count FROM site_settings').get() as { count: number };
+  if (settingsCount.count === 0) {
+    const insertSetting = db.prepare('INSERT INTO site_settings (key, value) VALUES (?, ?)');
+    const tx = db.transaction(() => {
+      insertSetting.run('buyout_description', 'Reserve the entire restaurant for your private event. Choose from tasting menus, family style, buffet, or small bites with full bar service.');
+      insertSetting.run('togo_description', 'Order our signature dishes for pickup. Perfect for office lunches, parties, and celebrations of any size.');
+      insertSetting.run('recommended_dishes', JSON.stringify({
+        appetizer:      [{ maxHeadcount: 20, count: 2 }, { maxHeadcount: 40, count: 3 }, { maxHeadcount: 80, count: 4 }],
+        soup:           [{ maxHeadcount: 40, count: 1 }, { maxHeadcount: 80, count: 2 }],
+        entree:         [{ maxHeadcount: 20, count: 2 }, { maxHeadcount: 40, count: 3 }, { maxHeadcount: 60, count: 4 }, { maxHeadcount: 80, count: 5 }],
+        side:           [{ maxHeadcount: 20, count: 1 }, { maxHeadcount: 80, count: 2 }],
+        'noodles-rice': [{ maxHeadcount: 20, count: 1 }, { maxHeadcount: 80, count: 2 }],
+        dessert:        [{ maxHeadcount: 30, count: 1 }, { maxHeadcount: 80, count: 2 }],
+      }));
+    });
+    tx();
+    console.log('  Inserted site settings');
+  } else {
+    console.log(`  Site settings already seeded (${settingsCount.count} rows)`);
+  }
+
+  // Rental fees
+  const rentalCount = db.prepare('SELECT COUNT(*) as count FROM rental_fees').get() as { count: number };
+  if (rentalCount.count === 0) {
+    const insertRental = db.prepare('INSERT INTO rental_fees (day_of_week, day_label, fee, sort_order) VALUES (?, ?, ?, ?)');
+    const tx = db.transaction(() => {
+      insertRental.run(0, 'Sunday',    1500, 0);
+      insertRental.run(1, 'Monday',    1000, 1);
+      insertRental.run(2, 'Tuesday',   1000, 2);
+      insertRental.run(3, 'Wednesday', 1000, 3);
+      insertRental.run(4, 'Thursday',  1500, 4);
+      insertRental.run(5, 'Friday',    2500, 5);
+      insertRental.run(6, 'Saturday',  3000, 6);
+    });
+    tx();
+    console.log('  Inserted 7 rental fee entries');
+  } else {
+    console.log(`  Rental fees already seeded (${rentalCount.count} rows)`);
+  }
+
   console.log('Seed complete.');
 }
 

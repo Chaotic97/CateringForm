@@ -23,6 +23,8 @@ export interface PriceEstimate {
   foodHigh: number;
   barLow: number;
   barHigh: number;
+  rentalFee: number;
+  rentalDayLabel: string;
   totalLow: number;
   totalHigh: number;
   headcount: number;
