@@ -20,6 +20,7 @@
     "better-sqlite3": "^12.6.2",
     "better-sqlite3-session-store": "^0.1.0",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.3.1",
     "express-session": "^1.19.0",
     "framer-motion": "^12.35.2",
     "react": "^19.2.0",

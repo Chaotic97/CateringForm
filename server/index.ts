@@ -1,6 +1,7 @@
 import express from 'express';
 import session from 'express-session';
 import BetterSqlite3Store from 'better-sqlite3-session-store';
+import rateLimit from 'express-rate-limit';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import db from './db.ts';
@@ -13,6 +14,12 @@ import settingsRoutes from './routes/settings.ts';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
+const isProd = process.env.NODE_ENV === 'production';
+
+if (isProd && !process.env.SESSION_SECRET) {
+  console.error('FATAL: SESSION_SECRET environment variable is required in production');
+  process.exit(1);
+}
 
 // Body parsing
 app.use(express.json());
@@ -27,20 +34,35 @@ app.use(session({
   cookie: {
     maxAge: 1000 * 60 * 60 * 24, // 24 hours
     httpOnly: true,
-    secure: false,
+    secure: isProd,
     sameSite: 'lax',
   },
 }));
 
+// Rate limiting for public submission endpoints
+const submitLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  message: { error: 'Too many submissions, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Health check
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // API routes
 app.use('/api/auth', authRoutes);
+app.post('/api/inquiries', submitLimiter);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/pricing', pricingRoutes);
 app.use('/api/settings', settingsRoutes);
 
 // In production, serve Vite build output
-if (process.env.NODE_ENV === 'production') {
+if (isProd) {
   const distDir = path.join(__dirname, '..', 'dist');
 
   // Hashed assets (js/css/images) — cache forever
