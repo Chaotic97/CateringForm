@@ -25,6 +25,8 @@ interface Inquiry {
   estimate_high: number | null;
   submitted: boolean;
   submitted_at: string;
+  customer_email_sent_at: string | null;
+  customer_email_status: string;
 }
 
 interface MenuItem {
@@ -73,6 +75,7 @@ export function InquiryDetail({ id, onNavigate }: { id: string; onNavigate: (pat
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
+  const [resending, setResending] = useState(false);
 
   useEffect(() => {
     fetch(`/api/inquiries/${id}`, { credentials: 'include' })
@@ -107,6 +110,23 @@ export function InquiryDetail({ id, onNavigate }: { id: string; onNavigate: (pat
     const data = await res.json();
     setInquiry(data);
     setSaving(false);
+  };
+
+  const resendEmail = async () => {
+    setResending(true);
+    try {
+      const res = await fetch(`/api/inquiries/${id}/resend-email`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setInquiry(data);
+      }
+    } catch {
+      // silently fail — status will show as failed
+    }
+    setResending(false);
   };
 
   if (!inquiry) return <p className="text-gray-400">Loading...</p>;
@@ -170,6 +190,42 @@ export function InquiryDetail({ id, onNavigate }: { id: string; onNavigate: (pat
             {s}
           </button>
         ))}
+      </div>
+
+      {/* Customer email status */}
+      <div className="flex items-center gap-3 text-sm">
+        <span className="text-gray-500">Customer email:</span>
+        {inquiry.customer_email_status === 'none' && (
+          <span className="inline-flex items-center gap-1.5 text-gray-400">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M22 6l-10 7L2 6" />
+            </svg>
+            Not sent
+          </span>
+        )}
+        {inquiry.customer_email_status === 'sent' && (
+          <span className="inline-flex items-center gap-1.5 text-green-600">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Sent {inquiry.customer_email_sent_at && new Date(inquiry.customer_email_sent_at).toLocaleString()}
+          </span>
+        )}
+        {inquiry.customer_email_status === 'failed' && (
+          <span className="inline-flex items-center gap-1.5 text-red-600">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Failed to send
+          </span>
+        )}
+        {(inquiry.customer_email_status === 'failed' || inquiry.customer_email_status === 'none') && (
+          <button onClick={resendEmail} disabled={resending}
+            className="px-2.5 py-1 rounded-md text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors">
+            {resending ? 'Sending...' : inquiry.customer_email_status === 'failed' ? 'Retry' : 'Send Now'}
+          </button>
+        )}
       </div>
 
       {/* Contact info */}

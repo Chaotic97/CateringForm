@@ -13,6 +13,9 @@ npm run dev:server     # Express API server via tsx watch (port 3001)
 npm run build          # tsc + vite build (outputs to dist/)
 npm start              # NODE_ENV=production Express serves API + both SPAs
 
+# DigitalOcean server — pull latest, rebuild, and restart
+cd ~/CateringForm && git pull && npm install && npm run build && export $(cat .env) && npm start
+
 # Database
 npm run seed           # Seed menu items, pricing tiers, default admin (safe to re-run)
 

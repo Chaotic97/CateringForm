@@ -58,6 +58,8 @@ interface InquiryRow {
   estimate_high: number | null;
   submitted: number;
   submitted_at: string;
+  customer_email_sent_at: string | null;
+  customer_email_status: string;
 }
 
 function rowToInquiry(row: InquiryRow) {
@@ -66,6 +68,44 @@ function rowToInquiry(row: InquiryRow) {
     selectedDishes: JSON.parse(row.selected_dishes),
     submitted: !!row.submitted,
   };
+}
+
+async function sendCustomerReviewEmail(row: InquiryRow) {
+  const resendKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.CUSTOMER_EMAIL_FROM || 'Sum Bar Catering <onboarding@resend.dev>';
+  if (!resendKey) {
+    console.warn('RESEND_API_KEY not set — skipping customer review email');
+    return { success: false, error: 'RESEND_API_KEY not configured' };
+  }
+
+  const { Resend } = await import('resend');
+  const resend = new Resend(resendKey);
+
+  const isBuyout = row.catering_type === 'buyout';
+  const isGeneral = row.catering_type === 'general';
+  const typeLabel = isBuyout ? 'Restaurant Buyout' : isGeneral ? 'General Inquiry' : 'To-Go Catering';
+
+  const result = await resend.emails.send({
+    from: fromEmail,
+    to: row.email,
+    subject: `Your ${typeLabel} inquiry is being reviewed — Sum Bar`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Hi ${row.first_name},</h2>
+        <p>Thank you for your ${typeLabel.toLowerCase()} inquiry! We wanted to let you know that our team is currently reviewing your request.</p>
+        ${!isGeneral && row.headcount ? `<p><strong>Party size:</strong> ${row.headcount} guests</p>` : ''}
+        ${isBuyout && row.event_date ? `<p><strong>Event date:</strong> ${row.event_date}</p>` : ''}
+        ${!isBuyout && !isGeneral && row.preferred_pickup_date ? `<p><strong>Pickup date:</strong> ${row.preferred_pickup_date}</p>` : ''}
+        <p>We'll be in touch soon with more details. If you have any questions in the meantime, feel free to reply to this email.</p>
+        <p>Best,<br/>The Sum Bar Team</p>
+      </div>
+    `,
+  });
+
+  if (result.error) {
+    return { success: false, error: result.error.message };
+  }
+  return { success: true, emailId: result.data?.id };
 }
 
 // Stats — must be before /:id to avoid matching "stats" as id
@@ -228,8 +268,52 @@ router.patch('/:id', requireAuth, (req, res) => {
     id
   );
 
+  // Send customer email when status changes to "reviewed"
+  if (status === 'reviewed' && existing.status !== 'reviewed' && existing.customer_email_status === 'none') {
+    sendCustomerReviewEmail(existing).then((result) => {
+      if (result.success) {
+        db.prepare(`
+          UPDATE inquiries SET customer_email_sent_at = datetime('now'), customer_email_status = 'sent' WHERE id = ?
+        `).run(id);
+      } else {
+        db.prepare(`
+          UPDATE inquiries SET customer_email_status = 'failed' WHERE id = ?
+        `).run(id);
+        console.error(`Failed to send customer review email for inquiry ${id}:`, result.error);
+      }
+    }).catch((err) => {
+      db.prepare(`
+        UPDATE inquiries SET customer_email_status = 'failed' WHERE id = ?
+      `).run(id);
+      console.error(`Failed to send customer review email for inquiry ${id}:`, err);
+    });
+  }
+
   const row = db.prepare('SELECT * FROM inquiries WHERE id = ?').get(id) as InquiryRow;
   res.json(rowToInquiry(row));
+});
+
+// Auth: resend customer review email
+router.post('/:id/resend-email', requireAuth, async (req, res) => {
+  const row = db.prepare('SELECT * FROM inquiries WHERE id = ?').get(req.params.id) as InquiryRow | undefined;
+  if (!row) {
+    res.status(404).json({ error: 'Inquiry not found' });
+    return;
+  }
+
+  const result = await sendCustomerReviewEmail(row);
+  if (result.success) {
+    db.prepare(`
+      UPDATE inquiries SET customer_email_sent_at = datetime('now'), customer_email_status = 'sent' WHERE id = ?
+    `).run(req.params.id);
+    const updated = db.prepare('SELECT * FROM inquiries WHERE id = ?').get(req.params.id) as InquiryRow;
+    res.json(rowToInquiry(updated));
+  } else {
+    db.prepare(`
+      UPDATE inquiries SET customer_email_status = 'failed' WHERE id = ?
+    `).run(req.params.id);
+    res.status(500).json({ error: 'Failed to send email', details: result.error });
+  }
 });
 
 export default router;

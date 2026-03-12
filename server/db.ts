@@ -65,7 +65,11 @@ db.exec(`
     estimate_high REAL,
     submitted INTEGER NOT NULL DEFAULT 0,
 
-    submitted_at TEXT NOT NULL DEFAULT (datetime('now'))
+    submitted_at TEXT NOT NULL DEFAULT (datetime('now')),
+
+    -- Customer email tracking
+    customer_email_sent_at TEXT,
+    customer_email_status TEXT NOT NULL DEFAULT 'none'
   );
 
   CREATE TABLE IF NOT EXISTS pricing_tiers (
@@ -106,6 +110,10 @@ db.exec(`
 const columns = db.prepare("PRAGMA table_info(inquiries)").all() as { name: string }[];
 if (!columns.some((c) => c.name === 'submitted')) {
   db.exec("ALTER TABLE inquiries ADD COLUMN submitted INTEGER NOT NULL DEFAULT 1");
+}
+if (!columns.some((c) => c.name === 'customer_email_sent_at')) {
+  db.exec("ALTER TABLE inquiries ADD COLUMN customer_email_sent_at TEXT");
+  db.exec("ALTER TABLE inquiries ADD COLUMN customer_email_status TEXT NOT NULL DEFAULT 'none'");
 }
 
 export default db;

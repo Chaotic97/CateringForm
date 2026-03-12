@@ -12,6 +12,7 @@ interface InquiryRow {
   headcount: number;
   submitted: boolean;
   submitted_at: string;
+  customer_email_status: string;
 }
 
 interface InquiryListResponse {
@@ -64,6 +65,7 @@ export function InquiryList({ onNavigate, initialStatus }: { onNavigate: (path: 
               <th className="px-4 py-3 text-left">Type</th>
               <th className="px-4 py-3 text-left">Guests</th>
               <th className="px-4 py-3 text-left">Status</th>
+              <th className="px-4 py-3 text-left">Email</th>
               <th className="px-4 py-3 text-left">Submitted</th>
             </tr>
           </thead>
@@ -80,11 +82,30 @@ export function InquiryList({ onNavigate, initialStatus }: { onNavigate: (path: 
                 </td>
                 <td className="px-4 py-3 text-gray-600">{inq.headcount}</td>
                 <td className="px-4 py-3"><StatusBadge status={inq.status} /></td>
+                <td className="px-4 py-3">
+                  {inq.customer_email_status === 'sent' && (
+                    <span className="text-green-600" title="Email sent">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                  )}
+                  {inq.customer_email_status === 'failed' && (
+                    <span className="text-red-500" title="Email failed">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </span>
+                  )}
+                  {inq.customer_email_status === 'none' && (
+                    <span className="text-gray-300">—</span>
+                  )}
+                </td>
                 <td className="px-4 py-3 text-gray-500">{new Date(inq.submitted_at).toLocaleDateString()}</td>
               </tr>
             ))}
             {data && data.inquiries.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">No inquiries found</td></tr>
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-400">No inquiries found</td></tr>
             )}
           </tbody>
         </table>
