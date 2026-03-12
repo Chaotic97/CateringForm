@@ -10,6 +10,7 @@ interface InquiryRow {
   email: string;
   phone: string;
   headcount: number;
+  submitted: boolean;
   submitted_at: string;
 }
 
@@ -73,7 +74,10 @@ export function InquiryList({ onNavigate, initialStatus }: { onNavigate: (path: 
                 <td className="px-4 py-3 text-gray-400">{inq.id}</td>
                 <td className="px-4 py-3 font-medium text-gray-900">{inq.first_name} {inq.last_name}</td>
                 <td className="px-4 py-3 text-gray-600">{inq.email}</td>
-                <td className="px-4 py-3 capitalize text-gray-600">{inq.catering_type === 'buyout' ? 'Buyout' : 'To-Go'}</td>
+                <td className="px-4 py-3 text-gray-600">
+                  {inq.catering_type === 'buyout' ? 'Buyout' : inq.catering_type === 'general' ? 'General' : 'To-Go'}
+                  {!inq.submitted && <span className="ml-1.5 text-xs text-amber-600">(Draft)</span>}
+                </td>
                 <td className="px-4 py-3 text-gray-600">{inq.headcount}</td>
                 <td className="px-4 py-3"><StatusBadge status={inq.status} /></td>
                 <td className="px-4 py-3 text-gray-500">{new Date(inq.submitted_at).toLocaleDateString()}</td>
