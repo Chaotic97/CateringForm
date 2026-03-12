@@ -56,6 +56,7 @@ app.get('/api/health', (_req, res) => {
 // API routes
 app.use('/api/auth', authRoutes);
 app.post('/api/inquiries', submitLimiter);
+app.post('/api/inquiries/:id/submit', submitLimiter);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/pricing', pricingRoutes);

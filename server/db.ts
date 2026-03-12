@@ -63,6 +63,7 @@ db.exec(`
     staff_notes TEXT NOT NULL DEFAULT '',
     estimate_low REAL,
     estimate_high REAL,
+    submitted INTEGER NOT NULL DEFAULT 0,
 
     submitted_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
@@ -100,5 +101,11 @@ db.exec(`
     sort_order INTEGER NOT NULL DEFAULT 0
   );
 `);
+
+// Migrations for existing databases
+const columns = db.prepare("PRAGMA table_info(inquiries)").all() as { name: string }[];
+if (!columns.some((c) => c.name === 'submitted')) {
+  db.exec("ALTER TABLE inquiries ADD COLUMN submitted INTEGER NOT NULL DEFAULT 1");
+}
 
 export default db;

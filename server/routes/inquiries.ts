@@ -1,8 +1,38 @@
-import { Router } from 'express';
+import { Router, type Request } from 'express';
 import db from '../db.ts';
 import { requireAuth } from '../middleware/requireAuth.ts';
 
 const router = Router();
+
+async function sendNotificationEmail(row: InquiryRow, req: Request) {
+  const staffEmail = process.env.STAFF_NOTIFY_EMAIL;
+  const resendKey = process.env.RESEND_API_KEY;
+  if (!staffEmail || !resendKey) return;
+
+  const { Resend } = await import('resend');
+  const resend = new Resend(resendKey);
+  const adminUrl = `${req.protocol}://${req.get('host')}/admin/#/inquiries/${row.id}`;
+  const cateringType = row.catering_type;
+  const isGeneral = cateringType === 'general';
+  const isBuyout = cateringType === 'buyout';
+
+  await resend.emails.send({
+    from: 'Sum Bar Catering <onboarding@resend.dev>',
+    to: staffEmail,
+    subject: `New ${isGeneral ? 'general' : cateringType} inquiry from ${row.first_name} ${row.last_name}`,
+    html: `
+      <h2>New ${isGeneral ? 'General' : 'Catering'} Inquiry</h2>
+      <p><strong>Type:</strong> ${isBuyout ? 'Restaurant Buyout' : cateringType === 'togo' ? 'To-Go Catering' : 'General Inquiry'}</p>
+      <p><strong>Contact:</strong> ${row.first_name} ${row.last_name}</p>
+      <p><strong>Email:</strong> ${row.email}</p>
+      ${!isGeneral ? `<p><strong>Headcount:</strong> ${row.headcount}</p>` : ''}
+      ${isBuyout && row.event_date ? `<p><strong>Event Date:</strong> ${row.event_date}</p>` : ''}
+      ${!isBuyout && !isGeneral && row.preferred_pickup_date ? `<p><strong>Pickup Date:</strong> ${row.preferred_pickup_date}</p>` : ''}
+      ${isGeneral && row.special_requests ? `<p><strong>Message:</strong> ${row.special_requests}</p>` : ''}
+      <p><a href="${adminUrl}">View in Admin Panel</a></p>
+    `,
+  });
+}
 
 interface InquiryRow {
   id: number;
@@ -26,6 +56,7 @@ interface InquiryRow {
   staff_notes: string;
   estimate_low: number | null;
   estimate_high: number | null;
+  submitted: number;
   submitted_at: string;
 }
 
@@ -33,6 +64,7 @@ function rowToInquiry(row: InquiryRow) {
   return {
     ...row,
     selectedDishes: JSON.parse(row.selected_dishes),
+    submitted: !!row.submitted,
   };
 }
 
@@ -49,9 +81,9 @@ router.get('/stats', requireAuth, (_req, res) => {
   res.json(stats);
 });
 
-// Public: create inquiry
+// Public: create inquiry (draft or submitted)
 router.post('/', async (req, res) => {
-  const { cateringType, contactData, buyoutData, togoData, estimateLow, estimateHigh } = req.body;
+  const { cateringType, contactData, buyoutData, togoData, estimateLow, estimateHigh, submitted } = req.body;
 
   if (!cateringType || !contactData) {
     res.status(400).json({ error: 'cateringType and contactData are required' });
@@ -68,8 +100,8 @@ router.post('/', async (req, res) => {
       catering_type, first_name, last_name, email, phone, special_requests,
       event_date, event_time, headcount, company_name, event_description,
       meal_type, bar_option, preferred_pickup_date, preferred_pickup_time,
-      selected_dishes, estimate_low, estimate_high
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      selected_dishes, estimate_low, estimate_high, submitted
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     cateringType,
     contactData.firstName, contactData.lastName, contactData.email, contactData.phone,
@@ -86,41 +118,49 @@ router.post('/', async (req, res) => {
     JSON.stringify(selectedDishes),
     estimateLow ?? null,
     estimateHigh ?? null,
+    submitted ? 1 : 0,
   );
 
   const inquiryId = result.lastInsertRowid;
+  const row = db.prepare('SELECT * FROM inquiries WHERE id = ?').get(inquiryId) as InquiryRow;
 
-  // Send notification email (non-blocking)
-  try {
-    const staffEmail = process.env.STAFF_NOTIFY_EMAIL;
-    const resendKey = process.env.RESEND_API_KEY;
-    if (staffEmail && resendKey) {
-      const { Resend } = await import('resend');
-      const resend = new Resend(resendKey);
-      const adminUrl = `${req.protocol}://${req.get('host')}/admin/#/inquiries/${inquiryId}`;
-      await resend.emails.send({
-        from: 'Sum Bar Catering <onboarding@resend.dev>',
-        to: staffEmail,
-        subject: `New ${cateringType === 'general' ? 'general' : cateringType} inquiry from ${contactData.firstName} ${contactData.lastName}`,
-        html: `
-          <h2>New ${cateringType === 'general' ? 'General' : 'Catering'} Inquiry</h2>
-          <p><strong>Type:</strong> ${cateringType === 'buyout' ? 'Restaurant Buyout' : cateringType === 'togo' ? 'To-Go Catering' : 'General Inquiry'}</p>
-          <p><strong>Contact:</strong> ${contactData.firstName} ${contactData.lastName}</p>
-          <p><strong>Email:</strong> ${contactData.email}</p>
-          ${!isGeneral ? `<p><strong>Headcount:</strong> ${headcount}</p>` : ''}
-          ${isBuyout && buyoutData?.eventDate ? `<p><strong>Event Date:</strong> ${buyoutData.eventDate}</p>` : ''}
-          ${!isBuyout && !isGeneral && togoData?.preferredPickupDate ? `<p><strong>Pickup Date:</strong> ${togoData.preferredPickupDate}</p>` : ''}
-          ${isGeneral && contactData.specialRequests ? `<p><strong>Message:</strong> ${contactData.specialRequests}</p>` : ''}
-          <p><a href="${adminUrl}">View in Admin Panel</a></p>
-        `,
-      });
-    }
-  } catch (err) {
-    console.error('Failed to send notification email:', err);
+  // Send notification email if immediately submitted (e.g. general contact flow)
+  if (submitted) {
+    sendNotificationEmail(row, req).catch((err) => {
+      console.error('Failed to send notification email:', err);
+    });
   }
 
-  const row = db.prepare('SELECT * FROM inquiries WHERE id = ?').get(inquiryId) as InquiryRow;
   res.status(201).json(rowToInquiry(row));
+});
+
+// Public: mark inquiry as submitted
+router.post('/:id/submit', async (req, res) => {
+  const { id } = req.params;
+  const existing = db.prepare('SELECT * FROM inquiries WHERE id = ?').get(id) as InquiryRow | undefined;
+  if (!existing) {
+    res.status(404).json({ error: 'Inquiry not found' });
+    return;
+  }
+
+  // Update estimate values if provided
+  const { estimateLow, estimateHigh } = req.body || {};
+  db.prepare(`
+    UPDATE inquiries SET submitted = 1, estimate_low = ?, estimate_high = ? WHERE id = ?
+  `).run(
+    estimateLow ?? existing.estimate_low,
+    estimateHigh ?? existing.estimate_high,
+    id
+  );
+
+  const row = db.prepare('SELECT * FROM inquiries WHERE id = ?').get(id) as InquiryRow;
+
+  // Send notification email (non-blocking)
+  sendNotificationEmail(row, req).catch((err) => {
+    console.error('Failed to send notification email:', err);
+  });
+
+  res.json(rowToInquiry(row));
 });
 
 // Auth: list inquiries with filters

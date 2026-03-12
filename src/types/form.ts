@@ -41,4 +41,5 @@ export interface FormState {
   togoData: ToGoFormData;
   contactData: ContactData;
   submittedAt: string | null;
+  inquiryId?: number | null;
 }

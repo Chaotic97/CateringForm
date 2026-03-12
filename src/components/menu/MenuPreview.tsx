@@ -2,24 +2,31 @@ import { useMenuItems } from '../../hooks/useMenuItems';
 
 interface MenuPreviewProps {
   mealType: string;
+  selectedDishIds?: string[];
 }
 
-export function MenuPreview({ mealType }: MenuPreviewProps) {
+export function MenuPreview({ mealType, selectedDishIds }: MenuPreviewProps) {
   const { items, CATEGORY_LABELS, CATEGORY_ORDER } = useMenuItems();
-  const availableItems = items.filter((item) => item.available);
+
+  // If specific dishes were selected, show only those; otherwise show all available
+  const filteredItems = selectedDishIds
+    ? items.filter((item) => selectedDishIds.includes(item.id))
+    : items.filter((item) => item.available);
 
   const groupedItems = CATEGORY_ORDER.map((category) => ({
     category,
     label: CATEGORY_LABELS[category] ?? category,
-    items: availableItems.filter((item) => item.category === category),
+    items: filteredItems.filter((item) => item.category === category),
   })).filter((group) => group.items.length > 0);
+
+  const heading = selectedDishIds ? 'Your Selected Menu' : 'Sample Menu';
 
   return (
     <div className="mx-auto max-w-xl text-center">
       {/* Header */}
       <div className="mb-8">
         <p className="text-xs font-body uppercase tracking-[0.2em] text-muted mb-2">
-          Sample Menu
+          {heading}
         </p>
         <h2 className="font-heading text-3xl font-bold text-text-main">
           {mealType === 'tasting' && 'Tasting Menu'}
@@ -84,9 +91,10 @@ export function MenuPreview({ mealType }: MenuPreviewProps) {
       {/* Footer note */}
       <div className="mt-10 pt-6 border-t border-border/50">
         <p className="font-body text-xs text-muted italic">
-          Menu items may vary based on seasonal availability.
-          <br />
-          Items marked with stars are our signature dishes.
+          {selectedDishIds
+            ? 'Your coordinator will finalize the menu details with you.'
+            : <>Menu items may vary based on seasonal availability.<br />Items marked with stars are our signature dishes.</>
+          }
         </p>
       </div>
     </div>

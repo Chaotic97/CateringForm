@@ -3,19 +3,20 @@ import { useFormStore } from '../../store/useFormStore';
 import { useBuyoutPricing } from '../../hooks/usePricing';
 import { PriceEstimate } from '../../components/shared/PriceEstimate';
 import { MenuPreview } from '../../components/menu/MenuPreview';
-import { sendInquiryNotification } from '../../services/email';
+import { submitInquiry, sendInquiryNotification } from '../../services/email';
 import { Button } from '../../components/ui/Button';
 
 export function EstimatePreview() {
+  const store = useFormStore();
   const {
     buyoutData,
     contactData,
     cateringType,
     togoData,
-    submittedAt,
+    inquiryId,
     submit,
     nextStep,
-  } = useFormStore();
+  } = store;
   const estimate = useBuyoutPricing();
   const [submitting, setSubmitting] = useState(false);
 
@@ -23,13 +24,22 @@ export function EstimatePreview() {
     setSubmitting(true);
     try {
       submit();
-      await sendInquiryNotification({
-        cateringType,
-        buyoutData,
-        togoData,
-        contactData,
-        submittedAt: submittedAt ?? new Date().toISOString(),
-      });
+      const estimates = estimate
+        ? { estimateLow: estimate.totalLow, estimateHigh: estimate.totalHigh }
+        : undefined;
+
+      if (inquiryId) {
+        await submitInquiry(inquiryId, estimates);
+      } else {
+        // Fallback: create and submit in one step if draft wasn't created
+        await sendInquiryNotification({
+          cateringType,
+          buyoutData,
+          togoData,
+          contactData,
+          submittedAt: new Date().toISOString(),
+        });
+      }
       nextStep();
     } catch {
       // Allow user to retry
@@ -65,10 +75,13 @@ export function EstimatePreview() {
           </Button>
         </div>
 
-        {/* Menu Preview */}
+        {/* Menu Preview — filtered to selected dishes if any */}
         <div>
           {buyoutData.mealType && (
-            <MenuPreview mealType={buyoutData.mealType} />
+            <MenuPreview
+              mealType={buyoutData.mealType}
+              selectedDishIds={buyoutData.selectedDishes.length > 0 ? buyoutData.selectedDishes : undefined}
+            />
           )}
         </div>
       </div>

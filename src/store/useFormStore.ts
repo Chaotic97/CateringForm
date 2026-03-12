@@ -10,6 +10,7 @@ interface FormStore {
   togoData: ToGoFormData;
   contactData: ContactData;
   submittedAt: string | null;
+  inquiryId: number | null;
 
   // Actions
   setCateringType: (type: CateringType) => void;
@@ -22,6 +23,7 @@ interface FormStore {
   toggleBuyoutDish: (dishId: string) => void;
   toggleDish: (dishId: string, headcount: number) => void;
   updateContact: (data: Partial<ContactData>) => void;
+  setInquiryId: (id: number) => void;
   submit: () => void;
   reset: () => void;
 }
@@ -61,6 +63,7 @@ export const useFormStore = create<FormStore>()(
       togoData: { ...initialToGo },
       contactData: { ...initialContact },
       submittedAt: null,
+      inquiryId: null,
 
       setCateringType: (type) => set({ cateringType: type, currentStep: 1 }),
 
@@ -117,6 +120,8 @@ export const useFormStore = create<FormStore>()(
           contactData: { ...state.contactData, ...data },
         })),
 
+      setInquiryId: (id) => set({ inquiryId: id }),
+
       submit: () => set({ submittedAt: new Date().toISOString() }),
 
       reset: () =>
@@ -127,6 +132,7 @@ export const useFormStore = create<FormStore>()(
           togoData: { ...initialToGo },
           contactData: { ...initialContact },
           submittedAt: null,
+          inquiryId: null,
         }),
     }),
     {

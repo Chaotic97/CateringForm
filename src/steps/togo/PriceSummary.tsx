@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useFormStore } from '../../store/useFormStore';
 import { useToGoPricing } from '../../hooks/usePricing';
 import { useMenuItems } from '../../hooks/useMenuItems';
-import { sendInquiryNotification } from '../../services/email';
+import { submitInquiry, sendInquiryNotification } from '../../services/email';
 import { Button } from '../../components/ui/Button';
 
 function formatCurrency(amount: number): string {
@@ -16,15 +16,16 @@ function formatCurrency(amount: number): string {
 
 export function PriceSummary() {
   const { items: menuItems } = useMenuItems();
+  const store = useFormStore();
   const {
     togoData,
     contactData,
     buyoutData,
     cateringType,
-    submittedAt,
+    inquiryId,
     submit,
     nextStep,
-  } = useFormStore();
+  } = store;
   const estimate = useToGoPricing();
   const [submitting, setSubmitting] = useState(false);
 
@@ -32,13 +33,22 @@ export function PriceSummary() {
     setSubmitting(true);
     try {
       submit();
-      await sendInquiryNotification({
-        cateringType,
-        buyoutData,
-        togoData,
-        contactData,
-        submittedAt: submittedAt ?? new Date().toISOString(),
-      });
+      const estimates = estimate
+        ? { estimateLow: estimate.totalLow, estimateHigh: estimate.totalLow }
+        : undefined;
+
+      if (inquiryId) {
+        await submitInquiry(inquiryId, estimates);
+      } else {
+        // Fallback: create and submit in one step if draft wasn't created
+        await sendInquiryNotification({
+          cateringType,
+          buyoutData,
+          togoData,
+          contactData,
+          submittedAt: new Date().toISOString(),
+        });
+      }
       nextStep();
     } catch {
       // Allow user to retry
